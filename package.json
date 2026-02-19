@@ -1,0 +1,12 @@
+{
+  "name": "code-sniff",
+  "version": "1.0.0",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently \"npm run dev --prefix client\" \"node server/index.js\"",
+    "start:unified": "cd client && npm run build && cd ../server && node index.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
