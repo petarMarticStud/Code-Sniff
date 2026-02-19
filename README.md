@@ -1,45 +1,102 @@
-# 📂 Code-Sniff
+# 🕵️‍♂️ Code-Sniff
 
-**Code-Sniff** is an intelligent code-review assistant designed to analyze Java source code for complexity and provide AI-powered refactoring suggestions. 
+**Code-Sniff** ist ein intelligenter Code-Review-Assistent, der Java-Quellcode auf Komplexität analysiert und **KI-gestützte Refactoring-Vorschläge** liefert.
 
-This project utilizes a **Unified Host Architecture**, meaning both the React frontend and the Node.js backend run on the same localhost port for a seamless, production-ready experience.
+Das Projekt nutzt eine **Unified Monorepo-Architektur**, bei der Frontend und Backend zentral verwaltet werden.
 
 ---
 
 ## 🚀 Features
 
-* **Static Code Analysis:** Calculates Cyclomatic Complexity and identifies "Code Smells" using AST parsing.
-* **AST Parsing:** Leverages `tree-sitter-java` for high-performance, fault-tolerant Java code interpretation.
-* **AI-Powered Refactoring:** Integrated OpenAI SDK to provide human-like code improvements and detailed explanations.
-* **Interactive Dashboard:** A modern UI featuring syntax highlighting, error markers, and side-by-side code comparisons.
-* **Single-Port Access:** No cross-origin (CORS) issues; the entire app is served from a single entry point.
+- **Statische Code-Analyse**  
+  Berechnet die zyklomatische Komplexität und identifiziert *Code Smells*.
+
+- **AST Parsing**  
+  Nutzt `tree-sitter-java` für präzise Code-Interpretation.
+
+- **KI-Refactoring**  
+  Integriertes OpenAI SDK für menschenähnliche Verbesserungsvorschläge.
+
+- **Modernes UI**  
+  Interaktives Dashboard mit Tailwind CSS v4.
+
+- **Unified Setup**  
+  Ein einziger Befehl startet die gesamte Entwicklungsumgebung.
 
 ---
 
 ## 🛠 Tech Stack
 
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | React (Vite), Tailwind CSS |
-| **Backend** | Node.js, Express |
-| **Analysis Engine** | Tree-sitter (Java) |
-| **AI Engine** | OpenAI API (GPT Models) |
+| Komponente | Technologie |
+|---------|------------|
+| Frontend | React (Vite), Tailwind CSS v4 |
+| Backend | Node.js, Express |
+| Analyse | Tree-sitter (Java) |
+| KI | OpenAI API (GPT Models) |
 
 ---
 
-## 💻 Local Setup (Unified Mode)
+## 💻 Local Setup
 
-This project is optimized to serve the frontend via the backend Express server, making it easy to run the entire stack with a single command.
+Folge diesen Schritten, um das Projekt lokal zu installieren und zu starten.
 
-### 1. Prerequisites
-* **Node.js** (v18 or higher)
-* An **OpenAI API Key**
+### 1. Voraussetzungen
 
-### 2. Installation & Build
+- Node.js **v18 oder höher**
+- Ein **OpenAI API Key**
+
+---
+
+### 2. Installation
+
+Klone das Repository und installiere alle Abhängigkeiten (Root, Client & Server) mit **einem Befehl**:
+
 ```bash
-# Clone the repository
 git clone https://github.com/petarmarticStud/code-sniff.git
 cd code-sniff
 
-# Install all dependencies (Root, Client, and Server)
-npm install && npm install --prefix client && npm install --prefix server
+# Installiert alle Pakete im gesamten Monorepo
+npm run install:all
+```
+
+## 3. Konfiguration
+
+Erstelle im Ordner `server/` eine Datei namens `.env` und füge deine Zugangsdaten hinzu:
+
+```env
+PORT=3000
+OPENAI_API_KEY=dein_openai_api_key_hier
+```
+## 4. Startet beide Server (Vite & Express)
+```bash
+npm run dev
+```
+
+## 🏗 Projektstruktur
+
+```plaintext
+code-sniff/
+├── client/          # React Frontend (Vite + Tailwind)
+├── server/          # Node.js Backend (Express + Tree-sitter)
+├── package.json     # Zentrale Steuerung (Root)
+└── README.md        # Dokumentation
+```
+
+## ⚠️Admin-Hinweis (Nur für Setup)
+Damit die oben genannten Befehle funktionieren, muss die package.json im Hauptverzeichnis
+(/code-sniff/package.json) wie folgt konfiguriert sein:
+```json
+{
+  "name": "code-sniff",
+  "version": "1.0.0",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "start": "npm run start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+```
+
