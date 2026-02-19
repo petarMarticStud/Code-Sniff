@@ -26,7 +26,7 @@ making it easy to run the entire stack with a single command
        
   2. Installation & Build
        # Clone the repository
-      - git clone https://github.com/your-username/code-sniff.git
+      - git clone https://github.com/petarmarticStud/code-sniff.git
       - cd code-sniff
         
       # Install all dependencies (Root, Client, and Server)
@@ -38,7 +38,7 @@ making it easy to run the entire stack with a single command
     PORT=3000
     
 4. Launching the App
-  # To build the frontend and start the backend on http://localhost:3000:Bash# This command builds the React app and starts the Node server
+  # To build the frontend and start the backend on http://localhost:3000:
   - npm run start:unified
     
 🏗 System Architecture
