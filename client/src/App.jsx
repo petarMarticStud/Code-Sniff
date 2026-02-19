@@ -1,22 +1,18 @@
 import { useEffect, useState } from 'react'
 
 function App() {
-    const [backendMsg, setBackendMsg] = useState('Waiting for server...')
-
-    useEffect(() => {
-        fetch('/api/analyze')
-            .then(res => res.json())
-            .then(data => setBackendMsg(data.message))
-            .catch(err => setBackendMsg('Connection failed!'))
-    }, [])
-
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white">
-            <h1 className="text-3xl font-bold mb-4">Code-Sniff Connection Test</h1>
-            <div className="p-6 bg-slate-800 rounded-lg shadow-xl">
-                Status: <span className="text-green-400 font-mono">{backendMsg}</span>
+        <div className="h-screen w-full bg-slate-900 flex items-center justify-center">
+            <div className="bg-white p-10 rounded-2xl shadow-2xl">
+                <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">
+                    Tailwind ist am Start!
+                </h1>
+                <p className="text-slate-600 mt-4 text-center font-medium">
+                    Die Konfiguration war erfolgreich.
+                </p>
             </div>
         </div>
     )
 }
+
 export default App
