@@ -1,0 +1,6 @@
+POST http://localhost:3000/api/analyze
+Content-Type: application/json
+
+{
+  "sourceCode": "public class Test { void method() { if(true) { System.out.println(); } } }"
+}

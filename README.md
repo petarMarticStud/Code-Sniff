@@ -1,45 +1,27 @@
-# 📂 Code-Sniff
-
-**Code-Sniff** is an intelligent code-review assistant designed to analyze Java source code for complexity and provide AI-powered refactoring suggestions. 
-
-This project utilizes a **Unified Host Architecture**, meaning both the React frontend and the Node.js backend run on the same localhost port for a seamless, production-ready experience.
-
----
-
-## 🚀 Features
-
-* **Static Code Analysis:** Calculates Cyclomatic Complexity and identifies "Code Smells" using AST parsing.
-* **AST Parsing:** Leverages `tree-sitter-java` for high-performance, fault-tolerant Java code interpretation.
-* **AI-Powered Refactoring:** Integrated OpenAI SDK to provide human-like code improvements and detailed explanations.
-* **Interactive Dashboard:** A modern UI featuring syntax highlighting, error markers, and side-by-side code comparisons.
-* **Single-Port Access:** No cross-origin (CORS) issues; the entire app is served from a single entry point.
-
----
-
-## 🛠 Tech Stack
-
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | React (Vite), Tailwind CSS |
-| **Backend** | Node.js, Express |
-| **Analysis Engine** | Tree-sitter (Java) |
-| **AI Engine** | OpenAI API (GPT Models) |
-
----
-
-## 💻 Local Setup (Unified Mode)
-
-This project is optimized to serve the frontend via the backend Express server, making it easy to run the entire stack with a single command.
-
-### 1. Prerequisites
-* **Node.js** (v18 or higher)
-* An **OpenAI API Key**
-
-### 2. Installation & Build
-```bash
-# Clone the repository
-git clone https://github.com/petarmarticStud/code-sniff.git
+🕵️‍♂️ Code-SniffCode-Sniff ist ein intelligenter Code-Review-Assistent, der Java-Quellcode auf Komplexität analysiert und KI-gestützte Refactoring-Vorschläge liefert.Das Projekt nutzt eine Unified Monorepo-Architektur, bei der Frontend und Backend zentral verwaltet werden.🚀 FeaturesStatische Code-Analyse: Berechnet die zyklomatische Komplexität und identifiziert "Code Smells".AST Parsing: Nutzt tree-sitter-java für präzise Code-Interpretation.KI-Refactoring: Integriertes OpenAI SDK für menschenähnliche Verbesserungsvorschläge.Modernes UI: Interaktives Dashboard mit Tailwind CSS v4.Unified Setup: Ein einziger Befehl startet die gesamte Entwicklungsumgebung.🛠 Tech StackKomponenteTechnologieFrontendReact (Vite), Tailwind CSS v4BackendNode.js, ExpressAnalyseTree-sitter (Java)KIOpenAI API (GPT Models)💻 Local SetupFolge diesen Schritten, um das Projekt lokal zu installieren und zu starten.1. VoraussetzungenNode.js (v18 oder höher)Ein OpenAI API Key2. InstallationKlone das Repository und installiere alle Abhängigkeiten (Root, Client & Server) mit einem Befehl:Bashgit clone https://github.com/petarmarticStud/code-sniff.git
 cd code-sniff
 
-# Install all dependencies (Root, Client, and Server)
-npm install && npm install --prefix client && npm install --prefix server
+# Installiert alle Pakete im gesamten Monorepo
+npm run install:all
+3. KonfigurationErstelle im Ordner server/ eine Datei namens .env und füge deine Zugangsdaten hinzu:Code-SnippetPORT=3000
+   OPENAI_API_KEY=dein_openai_api_key_hier
+4. Anwendung startenStarte das Frontend und das Backend gleichzeitig im Development-Modus:Bash# Startet beide Server (Vite & Express)
+   npm run dev
+   Frontend UI: http://localhost:5173Backend API: http://localhost:3000🏗 Projekt-StrukturPlaintextcode-sniff/
+   ├── client/          # React Frontend (Vite + Tailwind)
+   ├── server/          # Node.js Backend (Express + Tree-sitter)
+   ├── package.json     # Zentrale Steuerung (Root)
+   └── README.md        # Dokumentation
+   📈 Roadmap[x] Initiales Projekt-Setup & Architektur[x] Tailwind CSS v4 Integration[ ] Implementierung des Java-Datei-Uploads (Multer)[ ] Tree-sitter Integration für AST-Metriken[ ] KI-Modul für Refactoring-Vorschläge[ ] Finales Dashboard Design👥 TeamPeter: Backend Engineering, AST-Analyse & APIJamil: Frontend Architektur & UI/UX Design⚠️ Admin-Hinweis (Nur für Setup)Damit die oben genannten Befehle funktionieren, muss die package.json im Hauptverzeichnis (/code-sniff/package.json) wie folgt konfiguriert sein:JSON{
+   "name": "code-sniff",
+   "version": "1.0.0",
+   "scripts": {
+   "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+   "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+   "start": "npm run start --prefix server"
+   },
+   "devDependencies": {
+   "concurrently": "^8.2.2"
+   }
+   }
+   Möchtest du, dass ich dir jetzt helfe, die package.json im Hauptordner genau so anzupassen, damit der npm run dev Befehl sofort funktioniert?
