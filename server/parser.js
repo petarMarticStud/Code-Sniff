@@ -4,35 +4,91 @@ const Java = require('tree-sitter-java');
 const parser = new Parser();
 parser.setLanguage(Java);
 
-function calculateComplexity(node) {
-    let complexity = 1;
+/**
+ * M2: Hilfsfunktion zur Vereinfachung des AST für die UI.
+ * Entfernt unnötige Zeichen und bereitet die Struktur für Jamils Tree-View vor.
+ */
+function simplifyAST(node) {
+    return {
+        type: node.type,
+        // Wir filtern technische Symbole wie ";" oder "{" raus, damit der Baum sauber bleibt
+        children: node.children
+            .map(child => simplifyAST(child))
+            .filter(c => c.children.length > 0 || c.type.match(/^[a-z_]+$/))
+    };
+}
 
-    //Defdinieren von Knoten, die den Fluss verzweigen
+/**
+ * M3: Kern-Logik für die Zyklomatische Komplexität.
+ * Zählt nur Entscheidungspunkte (Verzweigungen).
+ */
+function calculateComplexity(node) {
+    let count = 0;
     const decisionNodes = [
-        'if_statement', 'while_statement', 'for_statement',
-        'do_statement', 'catch_clause', 'ternary_expression'
+        'if_statement',
+        'for_statement',
+        'while_statement',
+        'do_statement',
+        'catch_clause',
+        'ternary_expression',
+        'switch_label'
     ];
 
     if (decisionNodes.includes(node.type)) {
-        complexity++;
+        count = 1;
     }
 
-    // Rekursion: durch alle child-components gehen
     for (let i = 0; i < node.childCount; i++) {
-        complexity += calculateComplexity(node.child(i));
+        count += calculateComplexity(node.child(i));
     }
-
-    return complexity;
+    return count;
 }
 
-//Export für Nutzung in anderen Klassen
+/**
+ * User Story: Komplexität pro Methode berechnen.
+ * Sucht alle Methoden im Baum und berechnet deren spezifische Werte.
+ */
+function getMethodMetrics(node) {
+    let methods = [];
+
+    if (node.type === 'method_declaration') {
+        // Extrahiert den Namen der Methode
+        const nameNode = node.childForFieldName('name');
+        const methodName = nameNode ? nameNode.text : 'Anonyme Methode';
+
+        // Zyklomatische Komplexität
+        const complexity = calculateComplexity(node) + 1;
+
+        methods.push({
+            name: methodName,
+            complexity: complexity,
+            line: node.startPosition.row + 1 // Tree-Sitter zählt ab 0, wir brauchen 1-basiert
+        });
+    }
+
+    // Rekursiv nach Methoden in der Datei suchen
+    for (let i = 0; i < node.childCount; i++) {
+        methods = methods.concat(getMethodMetrics(node.child(i)));
+    }
+
+    return methods;
+}
+
+
 module.exports = {
     analyzeCode: (sourceCode) => {
         const tree = parser.parse(sourceCode);
-        const complexity = calculateComplexity(tree.rootNode);
+        const methodMetrics = getMethodMetrics(tree.rootNode);
+
+        //M5: Sortiert nach complexity
+        methodMetrics.sort((a, b) => b.complexity - a.complexity);
+
+        const totalComp = methodMetrics.reduce((acc, m) => acc + m.complexity, 0);
+
         return {
-            ast: tree.rootNode.toString(),
-            complexity: complexity
+            ast: simplifyAST(tree.rootNode),
+            methods: methodMetrics,
+            totalComplexity: totalComp || 1
         };
     }
 };

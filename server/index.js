@@ -11,20 +11,16 @@ app.use(express.json());
 app.post('/api/analyze', (req, res) => {
     const { sourceCode } = req.body;
 
-    if (!sourceCode) {
-        return res.status(400).json({ error: 'Bitte Java-Quellcode mitsenden.' });
+
+    if (!sourceCode || typeof sourceCode !== 'string') {
+        return res.status(400).json({ error: 'Ungültiger Dateiinhalt' });
     }
 
     try {
-        // Logik aus parser.js aufgerufen
         const result = analyzeCode(sourceCode);
-        res.json({
-            status: 'success',
-            data: result
-        });
+        res.json({ status: 'success', data: result });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Fehler bei der Analyse.' });
+        res.status(500).json({ error: 'Parsing fehlgeschlagen' });
     }
 });
 
