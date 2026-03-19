@@ -44,6 +44,9 @@ function calculateComplexity(node) {
     return count;
 }
 
+
+
+
 /**
  * User Story: Komplexität pro Methode berechnen.
  * Sucht alle Methoden im Baum und berechnet deren spezifische Werte.
@@ -56,13 +59,11 @@ function getMethodMetrics(node) {
         const nameNode = node.childForFieldName('name');
         const methodName = nameNode ? nameNode.text : 'Anonyme Methode';
 
-        // Zyklomatische Komplexität
-        const complexity = calculateComplexity(node) + 1;
-
         methods.push({
             name: methodName,
-            complexity: complexity,
-            line: node.startPosition.row + 1 // Tree-Sitter zählt ab 0, wir brauchen 1-basiert
+            complexity: calculateComplexity(node) + 1,
+            line: node.startPosition.row + 1, // Tree-Sitter zählt ab 0, wir brauchen 1-basiert
+            smells: detectSmells(node)
         });
     }
 
@@ -75,6 +76,21 @@ function getMethodMetrics(node) {
 }
 
 
+/**
+ * Code Smells (Fowler, 1999).
+ * Prüft auf Long Method (>20 Zeilen) und Too Many Parameters (>3).
+ */
+
+function detectSmells(node) {
+    let smells=0;
+    const lineCount = node.endPosition.row - node.startPosition.row;
+    if (lineCount > 20) smellls++
+
+    const params = node.childForFieldName('parameters');
+    if (params && params.namedChildCount > 3) smells++;
+    return smells;
+}
+
 module.exports = {
     analyzeCode: (sourceCode) => {
         const tree = parser.parse(sourceCode);
@@ -84,11 +100,20 @@ module.exports = {
         methodMetrics.sort((a, b) => b.complexity - a.complexity);
 
         const totalComp = methodMetrics.reduce((acc, m) => acc + m.complexity, 0);
+        const totalSmells = methodMetrics.reduce((acc, m) => acc + m.smells, 0);
 
+
+        /**
+         * Global Health Score Berechnung
+         * Basis: Maintainability Index (Oman & Hagemeister, 1992)
+         * Formel: 100 - (Komplexität * 2) - (Smells * 5)
+         */
+        const healthScore = Math.max(0, 100 - (totalComp * 2) - (totalSmells * 5));
         return {
             ast: simplifyAST(tree.rootNode),
             methods: methodMetrics,
-            totalComplexity: totalComp || 1
+            totalComplexity: totalComp || 1,
+            healthScore: healthScore
         };
     }
 };
