@@ -52,10 +52,9 @@ function App() {
             </button>
 
             {result && (
-                <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="space-y-6">
+                <div className="w-full max-w-[1600px] flex flex-col lg:flex-row gap-8 items-start">
 
-                        {/* NEU: Global Health Score Anzeige */}
+                    <div className="w-full lg:w-[450px] flex-shrink-0 space-y-6">
                         <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 text-center shadow-2xl">
                             <h2 className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Global Health Score</h2>
                             <div className={`text-7xl font-black ${
@@ -71,7 +70,7 @@ function App() {
                         <MethodTable methods={result.methods} />
                     </div>
 
-                    <div className="lg:col-span-2">
+                    <div className="flex-grow w-full h-[800px] min-h-[600px]">
                         <AstVisualizer ast={result.ast} />
                     </div>
                 </div>

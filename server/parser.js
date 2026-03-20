@@ -84,7 +84,7 @@ function getMethodMetrics(node) {
 function detectSmells(node) {
     let smells=0;
     const lineCount = node.endPosition.row - node.startPosition.row;
-    if (lineCount > 20) smellls++
+    if (lineCount > 20) smells++
 
     const params = node.childForFieldName('parameters');
     if (params && params.namedChildCount > 3) smells++;
