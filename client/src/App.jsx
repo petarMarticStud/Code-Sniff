@@ -2,15 +2,17 @@ import React, { useRef, useState } from 'react';
 import { AstVisualizer } from './components/AstVisualizer';
 import { MethodTable } from './components/MethodTable';
 import { ComplexitySummary } from './components/ComplexitySummary';
-import {AiAdvisor} from "./components/AiAdvisor.jsx";
+import { AiAdvisor } from "./components/AiAdvisor.jsx";
 
 function App() {
     const fileInputRef = useRef(null);
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null); // Neu: Für die Fehlermeldung
 
     const runAnalysis = async (fileContent) => {
         setLoading(true);
+        setError(null); // Alten Fehler löschen
         try {
             const response = await fetch('http://localhost:3000/api/analyze', {
                 method: 'POST',
@@ -21,6 +23,7 @@ function App() {
             setResult(json.data);
         } catch (err) {
             console.error("Analyse fehlgeschlagen:", err);
+            setError("Server-Fehler bei der Analyse.");
         } finally {
             setLoading(false);
         }
@@ -30,13 +33,40 @@ function App() {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
 
+        // Ist die Datei leer?
+        if (selectedFile.size === 0) {
+            setError("Die Datei ist leer und kann nicht analysiert werden.");
+            e.target.value = null; // Input zurücksetzen
+            return;
+        }
+
         const reader = new FileReader();
-        reader.onload = (event) => runAnalysis(event.target.result);
+        reader.onload = (event) => {
+            const content = event.target.result;
+            runAnalysis(content);
+        };
         reader.readAsText(selectedFile);
     };
 
     return (
         <div className="flex flex-col items-center min-h-screen bg-black text-white p-8 font-sans">
+
+            {error && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <div className="bg-gray-900 border border-red-500/50 p-8 rounded-3xl max-w-sm text-center shadow-2xl">
+                        <div className="text-red-500 text-5xl mb-4">⚠️</div>
+                        <h3 className="text-xl font-bold mb-2">Fehler</h3>
+                        <p className="text-gray-400 text-sm mb-6">{error}</p>
+                        <button
+                            onClick={() => setError(null)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-8 py-2 rounded-full font-bold transition-all"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <header className="mb-12 text-center">
                 <h1 className="text-5xl font-black tracking-tighter bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
                     CODE-SNIFF
@@ -53,18 +83,12 @@ function App() {
             </button>
 
             {result && (
-                <div className="w-full flex flex-col xl:flex-row gap-6 items-stretch">
-                    {/* SPALTE 1: Stats & Ranking*/}
-                    <div className="w-full xl:w-[400px] flex-shrink-0 space-y-6
-                                  bg-gray-900/60 border border-gray-800
-                                    rounded-3xl p-6 shadow-xl backdrop-blur">
+                <div className="w-full flex flex-col xl:flex-row gap-6 items-stretch animate-in fade-in duration-500">
 
+                    <div className="w-full xl:w-[400px] flex-shrink-0 space-y-6 bg-gray-900/60 border border-gray-800 rounded-3xl p-6 shadow-xl backdrop-blur">
                         <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 text-center shadow-2xl">
                             <h2 className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Global Health Score</h2>
-                            <div className={`text-7xl font-black ${
-                                result.healthScore > 80 ? 'text-green-400' :
-                                    result.healthScore > 50 ? 'text-orange-400' : 'text-red-500'
-                            }`}>
+                            <div className={`text-7xl font-black ${result.healthScore > 80 ? 'text-green-400' : result.healthScore > 50 ? 'text-orange-400' : 'text-red-500'}`}>
                                 {result.healthScore}
                             </div>
                             <p className="text-[10px] text-gray-500 mt-2">Basis: Maintainability Index</p>
@@ -73,21 +97,12 @@ function App() {
                         <MethodTable methods={result.methods} />
                     </div>
 
-                    {/* SPALTE 2: AST Visualizer (Mitte) */}
-                    <div className="flex-1 min-w-0
-                                  bg-gray-900/60 border border-gray-800
-                                    rounded-3xl p-4 shadow-xl backdrop-blur">
+                    <div className="flex-1 min-w-0 bg-gray-900/60 border border-gray-800 rounded-3xl p-4 shadow-xl backdrop-blur">
                         <AstVisualizer ast={result.ast} />
                     </div>
 
-                    {/* SPALTE 3: AI Advisor (Rechts neben AST) */}
-                    <div className="flex-1 min-w-[300px]
-                                  bg-gray-900/60 border border-gray-800
-                                    rounded-3xl p-6 shadow-xl backdrop-blur">
-                        <AiAdvisor
-                            suggestions={result.aiSuggestions}
-                            loading={loading} // loading State übergeben
-                        />
+                    <div className="flex-1 min-w-[300px] bg-gray-900/60 border border-gray-800 rounded-3xl p-6 shadow-xl backdrop-blur">
+                        <AiAdvisor suggestions={result.aiSuggestions} loading={loading} />
                     </div>
                 </div>
             )}
