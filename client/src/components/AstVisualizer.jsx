@@ -30,11 +30,18 @@ const TreeNode = ({ node }) => {
 
 export const AstVisualizer = ({ ast }) => {
     if (!ast) return null;
+
     return (
-        <div className="bg-gray-900 p-6 rounded-xl shadow-inner max-h-[500px] overflow-y-auto w-full border border-gray-700">
-            <h3 className="text-gray-500 uppercase text-xs font-black mb-4">Abstract Syntax Tree</h3>
-            <div className="font-mono text-sm">
-                <TreeNode node={ast} />
+        <div className="bg-gray-900 p-6 rounded-xl border border-gray-700 shadow-inner h-full flex flex-col">
+            <h3 className="text-gray-500 uppercase text-xs font-black mb-4">
+                Abstract Syntax Tree
+            </h3>
+
+            {/* 👇 EINZIGER Scroll-Container */}
+            <div className="flex-1 overflow-y-auto pr-2">
+                <div className="font-mono text-sm">
+                    <TreeNode node={ast} />
+                </div>
             </div>
         </div>
     );

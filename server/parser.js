@@ -1,66 +1,7 @@
 const Parser = require('tree-sitter');
 const Java = require('tree-sitter-java');
-const {OpenAI} = require("openai");
 const parser = new Parser();
 parser.setLanguage(Java);
-
-const openapi= new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-})
-
-
-/**
- AI Refactoring & Reasoning
- */
-async function getRefactoringSuggestions(sourceCode, metrics) {
-    try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    role: "system",
-                    content: "Du bist ein Experte für Clean Code und Refactoring von Java-Code. Analysiere den Code und gib einen kurzen, prägnanten Verbesserungsvorschlag."
-                },
-                {
-                    role: "user",
-                    content: `Hier ist mein Java-Code mit einer Gesamkomplexität von ${metrics.totalComplexity}. 
-                    Folgende Methoden sind kritisch: ${metrics.methods.filter(m => m.complexity > 10).map(m => m.name).join(', ')}.
-                    
-                    Code:
-                    ${sourceCode}`
-                }
-            ],
-            max_tokens: 500
-        });
-        return response.choices[0].message.content;
-    } catch (error) {
-        console.error("OpenAI Error:", error);
-        return "Vorschläge momentan nicht verfügbar.";
-    }
-}
-
-//POST-Endpoint für AI
-app.post('api/analyze', async (req,res) => {
-    try {
-        const {sourceCode} = req.body
-        const analysis = analyzeCode(sourceCode);
-
-        //KI-Vorschlag
-        const suggestions = await getRefactoringSuggestions(sourceCode, analysis);
-
-        res.json({
-            data: {
-                ...analysis,
-                aiSuggestions: suggestions
-            }
-        });
-    }
-    catch (error) {
-        res.status(500).json({error: "KI-Analyse fehlgeschlagen:" + error.message});
-    }
-})
-
-
 
 /**
  * M2: Hilfsfunktion zur Vereinfachung des AST für die UI.

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { AstVisualizer } from './components/AstVisualizer';
 import { MethodTable } from './components/MethodTable';
 import { ComplexitySummary } from './components/ComplexitySummary';
+import {AiAdvisor} from "./components/AiAdvisor.jsx";
 
 function App() {
     const fileInputRef = useRef(null);
@@ -52,9 +53,12 @@ function App() {
             </button>
 
             {result && (
-                <div className="w-full max-w-[1600px] flex flex-col lg:flex-row gap-8 items-start">
+                <div className="w-full flex flex-col xl:flex-row gap-6 items-stretch">
+                    {/* SPALTE 1: Stats & Ranking*/}
+                    <div className="w-full xl:w-[400px] flex-shrink-0 space-y-6
+                                  bg-gray-900/60 border border-gray-800
+                                    rounded-3xl p-6 shadow-xl backdrop-blur">
 
-                    <div className="w-full lg:w-[450px] flex-shrink-0 space-y-6">
                         <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 text-center shadow-2xl">
                             <h2 className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Global Health Score</h2>
                             <div className={`text-7xl font-black ${
@@ -65,13 +69,25 @@ function App() {
                             </div>
                             <p className="text-[10px] text-gray-500 mt-2">Basis: Maintainability Index</p>
                         </div>
-
                         <ComplexitySummary value={result.totalComplexity} />
                         <MethodTable methods={result.methods} />
                     </div>
 
-                    <div className="flex-grow w-full h-[800px] min-h-[600px]">
+                    {/* SPALTE 2: AST Visualizer (Mitte) */}
+                    <div className="flex-1 min-w-0
+                                  bg-gray-900/60 border border-gray-800
+                                    rounded-3xl p-4 shadow-xl backdrop-blur">
                         <AstVisualizer ast={result.ast} />
+                    </div>
+
+                    {/* SPALTE 3: AI Advisor (Rechts neben AST) */}
+                    <div className="flex-1 min-w-[300px]
+                                  bg-gray-900/60 border border-gray-800
+                                    rounded-3xl p-6 shadow-xl backdrop-blur">
+                        <AiAdvisor
+                            suggestions={result.aiSuggestions}
+                            loading={loading} // loading State übergeben
+                        />
                     </div>
                 </div>
             )}
