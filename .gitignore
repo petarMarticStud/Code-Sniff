@@ -5,3 +5,5 @@ dist/
 client/dist/
 server/uploads/*
 .idea/
+package-lock.json
+package.json
