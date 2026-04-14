@@ -89,5 +89,20 @@ app.post('/api/analyze', async (req, res) => {
     }
 });
 
+app.post('/api/getMethods', (req, res) => {
+    const { sourceCode } = req.body;
+    if (!sourceCode) return res.status(400).json({ error: 'Kein Code' });
+
+    try {
+        const analysis = analyzeCode(sourceCode);
+        res.json({
+            status: 'success',
+            data: analysis.methods
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => console.log(`🚀 Server läuft auf Port ${PORT}`));

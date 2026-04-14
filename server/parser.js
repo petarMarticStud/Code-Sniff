@@ -62,7 +62,8 @@ function getMethodMetrics(node) {
             name: methodName,
             complexity: calculateComplexity(node) + 1,
             line: node.startPosition.row + 1, // Tree-Sitter zählt ab 0, wir brauchen 1-basiert
-            smells: detectSmells(node)
+            smells: detectSmells(node),
+            body: node.text
         });
     }
 

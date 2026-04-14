@@ -5,6 +5,7 @@ import { MethodTable } from './components/MethodTable';
 import { ComplexitySummary } from './components/ComplexitySummary';
 import { AiAdvisor } from "./components/AiAdvisor.jsx";
 import { CodeViewer } from './components/CodeViewer';
+import { MethodSelector } from './components/MethodSelector';
 
 function App() {
     const fileInputRef = useRef(null);
@@ -14,6 +15,10 @@ function App() {
     const [showCodeViewer, setShowCodeViewer] = useState(false);
     const [sourceCode, setSourceCode] = useState(null);
     const [highlightedLine, setHighlightedLine] = useState(null);
+
+    const [isSelectingMethods, setIsSelectingMethods] = useState(false);
+    const [fileContentForAnalysis, setFileContentForAnalysis] = useState(null);
+
 
     const handleMethodClick = (lineNumber) => {
         // Switch to code viewer if not already showing
@@ -64,7 +69,11 @@ function App() {
         const reader = new FileReader();
         reader.onload = (event) => {
             const content = event.target.result;
-            runAnalysis(content);
+            setResult(null);
+            setError(null);
+            setIsSelectingMethods(true);
+            setFileContentForAnalysis(content);
+            fileInputRef.current.value = null;
         };
         reader.readAsText(selectedFile);
     };
@@ -109,14 +118,27 @@ function App() {
 
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".java" />
 
-            <div className="flex justify-center mb-12">
-                <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-full font-bold transition-all shadow-lg text-sm uppercase tracking-widest focus-visible:outline-none"
-                >
-                    {loading ? 'Analysiere...' : 'Datei wählen & analysieren'}
-                </button>
-            </div>
+            {isSelectingMethods && (
+                <MethodSelector
+                    fileContent={fileContentForAnalysis}
+                    onAnalyze={runAnalysis}
+                    onClose={() => {
+                        setIsSelectingMethods(false);
+                        setFileContentForAnalysis(null);
+                    }}
+                />
+            )}
+
+            {!isSelectingMethods && (
+                <div className="flex justify-center mb-12">
+                    <button
+                        onClick={() => fileInputRef.current.click()}
+                        className="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-full font-bold transition-all shadow-lg text-sm uppercase tracking-widest focus-visible:outline-none"
+                    >
+                        {loading ? 'Analysiere...' : 'Datei wählen & analysieren'}
+                    </button>
+                </div>
+            )}
 
             {result && (
                 <div className="w-full flex flex-col xl:flex-row gap-6 items-stretch animate-in fade-in duration-500 flex-1 overflow-hidden">
