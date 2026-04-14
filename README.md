@@ -32,7 +32,7 @@ Das Projekt nutzt eine **Unified Monorepo-Architektur**, bei der Frontend und Ba
 | Frontend | React (Vite), Tailwind CSS v4 |
 | Backend | Node.js, Express |
 | Analyse | Tree-sitter (Java) |
-| KI | OpenAI API (GPT Models) |
+| KI | GroQ API (Llama Models) |
 
 ---
 
@@ -43,7 +43,7 @@ Folge diesen Schritten, um das Projekt lokal zu installieren und zu starten.
 ### 1. Voraussetzungen
 
 - Node.js **v18 oder höher**
-- Ein **OpenAI API Key**
+- Ein **Groq API Key**
 
 ---
 
@@ -65,7 +65,7 @@ Erstelle im Ordner `server/` eine Datei namens `.env` und füge deine Zugangsdat
 
 ```env
 PORT=3000
-OPENAI_API_KEY=dein_openai_api_key_hier
+OPENAI_API_KEY=dein_groq_api_key_hier
 ```
 ## 4. Startet beide Server (Vite & Express)
 ```bash
