@@ -1,8 +1,17 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const AiAdvisor = ({ suggestions, loading }) => {
     // Wenn keine Daten da sind und nicht geladen wird, zeigen wir nichts an
     if (!suggestions && !loading) return null;
+
+    const { t, i18n } = useTranslation();
+
+    console.log('Suggestions:', suggestions);
+    console.log('Suggestions keys:', Object.keys(suggestions));
+    console.log('Suggestions.de:', suggestions?.de);
+    console.log('Suggestions.en:', suggestions?.en);
+    console.log('Current language:', i18n.language);
 
     return (
         <div className="w-full">
@@ -17,7 +26,7 @@ export const AiAdvisor = ({ suggestions, loading }) => {
                     )}
                 </div>
                 <h3 className="text-blue-400 text-[10px] font-black uppercase tracking-widest">
-                    AI Refactoring Advisor
+                    {t('aiAdvisor')}
                 </h3>
             </div>
 
@@ -31,7 +40,7 @@ export const AiAdvisor = ({ suggestions, loading }) => {
                 <div className="text-sm text-gray-300 leading-relaxed font-sans prose prose-invert">
                     {/* Wir nutzen whitespace-pre-wrap, damit Zeilenumbrüche der KI erhalten bleiben */}
                     <p className="whitespace-pre-wrap italic opacity-90">
-                        "{suggestions}"
+                        "{suggestions?.[i18n.language]}"
                     </p>
                 </div>
             )}

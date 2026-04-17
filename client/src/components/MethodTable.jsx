@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const MethodTable = ({methods, onMethodClick}) => {
+    const { t } = useTranslation();
+
     const [searchTerm, setSearchTerm] = useState('');
     const [sortAscending, setSortAscending] = useState(false);
 
@@ -24,14 +27,14 @@ export const MethodTable = ({methods, onMethodClick}) => {
         className="w-full bg-gray-800 rounded-3xl overflow-hidden border border-gray-700 shadow-2xl flex flex-col max-h-[500px]">
         <div className="bg-gray-700/50 px-8 py-4 border-b border-gray-700">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                Critical Method Ranking
+                {t('criticalMethodRanking')}
             </h3>
         </div>
 
         <div className="bg-gray-750/30 px-8 py-4 border-b border-gray-700 flex items-center gap-4">
             <input
                 type="text"
-                placeholder="Filter by method name..."
+                placeholder={t('filterByMethodName')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="flex-1 bg-gray-700/60 text-gray-200 text-sm px-3 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
@@ -39,7 +42,7 @@ export const MethodTable = ({methods, onMethodClick}) => {
             <button
                 onClick={() => setSortAscending(!sortAscending)}
                 className="flex items-center justify-center bg-gray-700 hover:bg-gray-600 p-2 rounded border border-gray-600 hover:border-gray-500 transition-colors text-gray-300"
-                title={sortAscending ? "Sort: Low to High" : "Sort: High to Low"}
+                title={sortAscending ? t('sortLowToHigh') : t('sortHighToLow')}
             >
                 <svg
                     width="16"
@@ -64,9 +67,9 @@ export const MethodTable = ({methods, onMethodClick}) => {
             <table className="w-full text-left border-collapse">
                 <thead>
                 <tr className="text-gray-500 text-[10px] uppercase tracking-wider border-b border-gray-700 sticky top-0 bg-gray-800">
-                    <th className="px-4 py-4 font-bold">Method Name</th>
-                    <th className="px-4 py-4 font-bold">Line</th>
-                    <th className="px-4 py-4 font-bold text-right">Complexity</th>
+                    <th className="px-4 py-4 font-bold">{t('methodName')}</th>
+                    <th className="px-4 py-4 font-bold">{t('line')}</th>
+                    <th className="px-4 py-4 font-bold text-right">{t('complexity')}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -85,7 +88,7 @@ export const MethodTable = ({methods, onMethodClick}) => {
                         </div>
                     </td>
                     <td className="px-4 py-4 text-gray-500 font-mono text-xs">
-                        L{method.line}
+                        {t('L')}{method.line}
                     </td>
                     <td className="px-4 py-4 text-right">
                           <span

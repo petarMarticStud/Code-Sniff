@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const ComplexitySummary = ({ value }) => {
+    const { t } = useTranslation();
     // Farblogik basierend auf Schwellenwerten
     const getComplexityColor = (val) => {
         if (val > 20) return 'text-red-500';
@@ -9,14 +11,14 @@ export const ComplexitySummary = ({ value }) => {
     };
 
     const getStatusText = (val) => {
-        if (val > 20) return 'Kritisch';
-        if (val > 10) return 'Warnung';
-        return 'Alles Sauber';
+        if (val > 20) return t('critical');
+        if (val > 10) return t('warning');
+        return t('allClear');
     };
 
     return (
         <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 text-center shadow-2xl">
-            <h2 className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Total Complexity</h2>
+            <h2 className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">{t('totalComplexity')}</h2>
             <div className={`text-7xl font-black transition-colors duration-500 ${getComplexityColor(value)}`}>
                 {value}
             </div>

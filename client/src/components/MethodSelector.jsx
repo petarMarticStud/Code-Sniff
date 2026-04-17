@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function MethodSelector({ fileContent, onAnalyze, onClose }) {
+	const { t } = useTranslation();
 	const [methods, setMethods] = useState([]);
 	const [selectedMethods, setSelectedMethods] = useState([]);
 	const [isEntireFileSelected, setIsEntireFileSelected] = useState(false);
@@ -22,7 +24,7 @@ export function MethodSelector({ fileContent, onAnalyze, onClose }) {
 				setIsEntireFileSelected(false);
 				setError(null);
 			})
-			.catch(() => setError('Methoden konnten nicht geladen werden.'))
+			.catch(() => setError(t('loadingMethodsError')))
 			.finally(() => setLoading(false));
 	}, [fileContent]);
 
@@ -63,18 +65,18 @@ export function MethodSelector({ fileContent, onAnalyze, onClose }) {
 
 	return (
 		<div className="flex-1 bg-gray-900/80 border border-blue-500/30 rounded-3xl p-8 backdrop-blur-md animate-in zoom-in-95 duration-300">
-			<h3 className="text-2xl font-bold mb-6 text-blue-400">Select Scope for Analysis</h3>
+			<h3 className="text-2xl font-bold mb-6 text-blue-400">{t('selectScopeForAnalysis')}</h3>
 			<div className="overflow-hidden rounded-2xl border border-gray-800 bg-black/40">
 				{loading ? (
-					<div className="p-8 text-center text-blue-400">Lade Methoden...</div>
+					<div className="p-8 text-center text-blue-400">{t('loadingMethods')}</div>
 				) : error ? (
 					<div className="p-8 text-center text-red-400">{error}</div>
 				) : (
 					<table className="w-full text-left border-collapse">
 						<thead>
 							<tr className="bg-gray-800/50 text-[10px] uppercase tracking-widest text-gray-400">
-								<th className="p-4 w-12">Select</th>
-								<th className="p-4">Method Name / Scope</th>
+								<th className="p-4 w-12">{t('select')}</th>
+								<th className="p-4">{t('methodNameScope')}</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-800">
@@ -91,7 +93,7 @@ export function MethodSelector({ fileContent, onAnalyze, onClose }) {
 										className="w-5 h-5 accent-blue-500 cursor-pointer"
 									/>
 								</td>
-								<td className="p-4 font-bold text-blue-300 italic select-none">[ Entire File ]</td>
+								<td className="p-4 font-bold text-blue-300 italic select-none">{t('entireFile')}</td>
 							</tr>
 							{/* Individual Methods */}
 							{methods.map((method, index) => (
@@ -120,13 +122,13 @@ export function MethodSelector({ fileContent, onAnalyze, onClose }) {
 				<button
 					onClick={onClose}
 					className="bg-gray-700 hover:bg-gray-600 px-8 py-3 rounded-full font-bold transition-all shadow text-gray-300"
-				>Abbrechen</button>
+				>{t('cancel')}</button>
 				<button
 					onClick={handleAnalyze}
 					disabled={selectedMethods.length === 0 && !isEntireFileSelected}
 					className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed px-10 py-3 rounded-full font-black uppercase tracking-tighter transition-all shadow-lg active:scale-95"
 				>
-					Analysieren ({isEntireFileSelected ? 'All' : selectedMethods.length})
+					{t('analyze')} ({isEntireFileSelected ? t('all') : selectedMethods.length})
 				</button>
 			</div>
 		</div>

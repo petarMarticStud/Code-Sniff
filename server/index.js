@@ -26,11 +26,11 @@ async function getRefactoringSuggestions(sourceCode, metrics) {
             messages: [
                 {
                     role: "system",
-                    content: `Du bist ein hochpräziser Java-Code-Analysator. Gehe bei deiner Analyse in zwei Schritten vor. 1. PRÜFUNG: Ist der Code syntaktisch korrekt? Falls nein, nenne exakt die Zeile und den Fehler (z.B. 'Code gebrochen in Zeile 12: Fehlende Klammer'). 2. REFACTORING: Gib kurze fachliche Tipps für Clean Code.
+                    content: `Du bist ein hochpräziser Java-Code-Analysator. Gehe bei deiner Analyse in zwei Schritten vor. 1. REVIEW: Ist der Code syntaktisch korrekt? Falls nein, nenne exakt die Zeile und den Fehler (z.B. 'Code gebrochen in Zeile 12: Fehlende Klammer'). 2. REFACTORING: Gib kurze fachliche Tipps für Clean Code.
             
                     Antworte direkt, präzise und ohne lange Einleitung.
                     
-                    gib das alles unter der überschrift "SUGGESTIONS:" aus, damit ich es später leicht parsen kann.
+                    gib das alles unter der überschrift "SUGGESTIONS:" aus, damit ich es später leicht parsen kann. dieser teil soll klar, detaliert und strukturiert sein. und ich brauch den einmal auf Deutsch unter den überschrift "SUGGESTIONS_DE:" und einmal auf Englisch unter der überschrift "SUGGESTIONS_EN:".
                     
                     Danach gib unter der Überschrift "REFACTORED_CODE:" den komplett refaktorierten Code zurück mit deine Änderungsvorschläge implementiert, falls du Änderungen vorschlägst. Behalte die gleiche Codestruktur, Formatierung und alle Kommentare bei.`
                 },
@@ -41,28 +41,36 @@ async function getRefactoringSuggestions(sourceCode, metrics) {
             ],
             model: "llama-3.3-70b-versatile",
             temperature: 0.2,
-            max_tokens: 1200,
+            max_tokens: 2000,
         });
 
         const response = chatCompletion.choices[0]?.message?.content || "";
         
         // Parse suggestions and refactored code from response
-        const suggestionsMatch = response.match(/SUGGESTIONS:\s*([\s\S]*?)(?=# REFACTORED_CODE:|$)/);
-        const refactoredMatch = response.match(/REFACTORED_CODE:\s*```java\s*([\s\S]*?)```/);
+        const suggestionsMatch_DE = response.match(/#\s*SUGGESTIONS_DE:\s*([\s\S]*?)(?=# SUGGESTIONS_EN:|$)/);
+        const suggestionsMatch_EN = response.match(/#\s*SUGGESTIONS_EN:\s*([\s\S]*?)(?=# REFACTORED_CODE:|$)/);
+        const refactoredMatch = response.match(/#\s*REFACTORED_CODE:\s*```java\s*([\s\S]*?)```/);
         
-        const suggestions = suggestionsMatch ? suggestionsMatch[1].trim() : "Keine Vorschläge erhalten.";
+        const suggestionsDE = suggestionsMatch_DE ? suggestionsMatch_DE[1].trim() : "Keine Vorschläge erhalten.";
+        const suggestionsEN = suggestionsMatch_EN ? suggestionsMatch_EN[1].trim() : "No suggestions received.";
         const refactoredCode = refactoredMatch ? refactoredMatch[1].trim() : sourceCode;
 
-        console.log(response);
+        console.log(suggestionsDE, suggestionsEN);
         
         return {
-            suggestions,
+            suggestions: {
+                de: suggestionsDE,
+                en: suggestionsEN
+            },
             refactoredCode
         };
     } catch (error) {
         console.error("Groq Fehler:", error.message);
         return {
-            suggestions: "KI-Analyse aktuell nicht möglich.",
+            suggestions: {
+                de: "KI-Analyse aktuell nicht möglich.",
+                en: "AI analysis currently unavailable."
+            },
             refactoredCode: sourceCode
         };
     }
@@ -72,11 +80,27 @@ app.post('/api/analyze', async (req, res) => {
     const { sourceCode } = req.body;
     if (!sourceCode) return res.status(400).json({ error: 'Kein Code' });
 
-    try {
-        const analysis = analyzeCode(sourceCode);
-        const aiAnalysis = await getRefactoringSuggestions(sourceCode, analysis);
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
 
-        res.json({
+    const send = (type, message) => {
+         res.write(`data: ${JSON.stringify({ type: type, message: message })}\n\n`);
+    };
+
+    try {
+        const analysis = await analyzeCode(sourceCode, send);
+        send("status", "analyzing");
+
+        const waitingTimer = setTimeout(() => {
+            send("status", "aiIsThinking");
+        }, 10_000);
+
+        const aiAnalysis = await getRefactoringSuggestions(sourceCode, analysis);
+        clearTimeout(waitingTimer);
+
+        send("status", "analysisComplete");
+        send("result", {
             status: 'success',
             data: {
                 ...analysis,
@@ -84,17 +108,18 @@ app.post('/api/analyze', async (req, res) => {
                 refactoredCode: aiAnalysis.refactoredCode
             }
         });
+        res.end();
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        send("error", err.message );
     }
 });
 
-app.post('/api/getMethods', (req, res) => {
+app.post('/api/getMethods', async (req, res) => {
     const { sourceCode } = req.body;
     if (!sourceCode) return res.status(400).json({ error: 'Kein Code' });
 
     try {
-        const analysis = analyzeCode(sourceCode);
+        const analysis = await analyzeCode(sourceCode);
         res.json({
             status: 'success',
             data: analysis.methods

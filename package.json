@@ -10,6 +10,7 @@
     "concurrently": "^8.2.0"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "cors": "^2.8.6",
     "groq-sdk": "^1.1.2",
     "openai": "^6.33.0",

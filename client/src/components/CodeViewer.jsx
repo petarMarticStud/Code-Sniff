@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTranslation } from 'react-i18next';
 
 function normalizeCode(value) {
     return (value || '').replace(/\r\n/g, '\n');
@@ -45,7 +46,9 @@ export function CodeViewer({
     refactoredCode,
     language = 'java',
     highlightedLine = null,
+    handleDirectInput
 }) {
+    const { t } = useTranslation();
     const [isCopying, setIsCopying] = useState(false);
     const diffViewerRef = useRef(null);
     
@@ -112,7 +115,7 @@ export function CodeViewer({
         setIsCopying(true);
         try {
             await navigator.clipboard.writeText(refactoredCode);
-            toast.success('Refactored code copied to clipboard!', {
+            toast.success(t('copyToast'), {
                 duration: 3000,
                 position: 'top-right',
                 style: {
@@ -123,7 +126,7 @@ export function CodeViewer({
                 },
             });
         } catch (error) {
-            toast.error('Failed to copy code', {
+            toast.error(t('copyToastError'), {
                 duration: 3000,
                 position: 'top-right',
                 style: {
@@ -143,18 +146,18 @@ export function CodeViewer({
             <div className="h-full rounded-3xl overflow-hidden border border-gray-800 bg-gray-900/60 shadow-xl backdrop-blur">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-800/50">
                     <h3 className="text-sm font-bold uppercase tracking-widest text-gray-300">
-                        Code Comparison
+                        {t('codeComparison')}
                     </h3>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-4 text-xs font-medium">
-                            <span className="text-red-300">Removed</span>
-                            <span className="text-green-300">Added</span>
+                            <span className="text-red-300">{t('removed')}</span>
+                            <span className="text-green-300">{t('added')}</span>
                         </div>
                         <button
                             onClick={handleCopyRefactoredCode}
                             disabled={isCopying}
                             className="ml-4 p-2 text-white bg-gray-700 hover:bg-gray-600 active:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded border border-gray-600 hover:border-gray-500 flex items-center justify-center"
-                            title="Copy refactored code to clipboard"
+                            title={t('copyFloat')}
                         >
                             <svg
                                 width="18"
@@ -170,6 +173,13 @@ export function CodeViewer({
                                 <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                             </svg>
                         </button>
+                        <button
+                            onClick={() => handleDirectInput && handleDirectInput(refactoredCode)}
+                            className="ml-2 px-4 py-2 text-white bg-purple-600 hover:bg-purple-500 active:bg-purple-700 transition-colors rounded border border-purple-500 hover:border-purple-400 text-sm font-medium"
+                            title={t('reAnalyzeCodeFloat')}
+                        >
+                            {t('reAnalyzeCode')}
+                        </button>
                     </div>
                 </div>
 
@@ -183,8 +193,8 @@ export function CodeViewer({
                         showDiffOnly={false}
                         hideLineNumbers={false}
                         renderContent={renderContent}
-                        leftTitle="Original Code"
-                        rightTitle="Refactored Code"
+                        leftTitle={t('originalCode')}
+                        rightTitle={t('refactoredCode')}
                         useDarkTheme={true}
                         styles={{
                             variables: {

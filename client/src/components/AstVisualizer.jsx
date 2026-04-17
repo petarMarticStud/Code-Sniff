@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const TreeNode = ({ node }) => {
     const [isOpen, setIsOpen] = useState(true);
@@ -31,10 +32,12 @@ const TreeNode = ({ node }) => {
 export const AstVisualizer = ({ ast }) => {
     if (!ast) return null;
 
+    const { t } = useTranslation();
+
     return (
         <div className="bg-gray-900 p-6 rounded-xl border border-gray-700 shadow-inner h-full flex flex-col">
             <h3 className="text-gray-500 uppercase text-xs font-black mb-4">
-                Abstract Syntax Tree
+                {t('abstractSyntaxTree')}
             </h3>
 
             {/* 👇 EINZIGER Scroll-Container */}
