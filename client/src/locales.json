@@ -48,7 +48,19 @@
     "aiIsThinking": "AI is thinking...",
     "analysisComplete": "Analysis complete.",
     "parsing": "Parsing Code...",
-    "calculatingMetrics": "Calculating Metrics..."
+    "calculatingMetrics": "Calculating Metrics...",
+    "showDiffrences": "Show Differences",
+    "hideDiffrences": "Hide Differences",
+    "generateUnitTestsFloat": "Generate unit tests for your refactored code using JUnit",
+    "generateUnitTests": "Generate Unit Tests",
+    "goToUnitTests": "Go To Unit Tests",
+    "copyTestsToast": "Tests copied to clipboard!",
+    "copyTestsToastError": "Failed to copy tests",
+    "downloadTestsToast": "Unit tests downloaded!",
+    "copyTestsFloat": "Copy tests to clipboard",
+    "downloadTestsFloat": "Download as Java file",
+    "generatedUnitTests": "Generated Unit Tests",
+    "generatingTests": "Generating tests..."
   },
   "de": {
     "ready": "Bereit",
@@ -99,6 +111,18 @@
     "aiIsThinking": "KI denkt...",
     "analysisComplete": "Analyse abgeschlossen.",
     "parsing": "Code wird geparst...",
-    "calculatingMetrics": "Metriken werden berechnet..."
+    "calculatingMetrics": "Metriken werden berechnet...",
+    "showDiffrences": "Unterschiede anzeigen",
+    "hideDiffrences": "Unterschiede verbergen",
+    "generateUnitTestsFloat": "Erstellt Unit-Tests für Ihren refaktorierten Code mit JUnit",
+    "generateUnitTests": "Unit-Tests generieren",
+    "goToUnitTests": "Zu den Unit-Tests",
+    "copyTestsToast": "Tests in die Zwischenablage kopiert!",
+    "copyTestsToastError": "Fehler beim Kopieren der Tests",
+    "downloadTestsToast": "Unit-Tests heruntergeladen!",
+    "copyTestsFloat": "Tests in die Zwischenablage kopieren",
+    "downloadTestsFloat": "Als Java-Datei herunterladen",
+    "generatedUnitTests": "Generierte Unit-Tests",
+    "generatingTests": "Generiere Tests..."
   }
 }

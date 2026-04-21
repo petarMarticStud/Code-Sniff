@@ -6,6 +6,7 @@ import { ComplexitySummary } from './components/ComplexitySummary';
 import { AiAdvisor } from "./components/AiAdvisor.jsx";
 import { CodeViewer } from './components/CodeViewer';
 import { MethodSelector } from './components/MethodSelector';
+import { TestViewer } from './components/TestViewer';
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useTranslation } from 'react-i18next';
 
@@ -22,6 +23,9 @@ function App() {
 
     const [isSelectingMethods, setIsSelectingMethods] = useState(false);
     const [fileContentForAnalysis, setFileContentForAnalysis] = useState(null);
+    const [hasGeneratedTests, setHasGeneratedTests] = useState(false);
+    const [generatedTests, setGeneratedTests] = useState(null);
+    const testViewerRef = useRef(null);
 
 
     const handleMethodClick = (lineNumber) => {
@@ -86,6 +90,8 @@ function App() {
             const content = event.target.result;
             setResult(null);
             setError(null);
+            setHasGeneratedTests(false);
+            setGeneratedTests(null);
             setIsSelectingMethods(true);
             setFileContentForAnalysis(content);
             fileInputRef.current.value = null;
@@ -96,6 +102,8 @@ function App() {
     const handleDirectInput = (sourceCode) => {
         setResult(null);
         setError(null);
+        setHasGeneratedTests(false);
+        setGeneratedTests(null);
         setIsSelectingMethods(true);
         setFileContentForAnalysis(sourceCode);
         fileInputRef.current.value = null;
@@ -183,11 +191,26 @@ function App() {
                         </div>
                         <ComplexitySummary value={result.totalComplexity} />
                         <MethodTable methods={result.methods} onMethodClick={handleMethodClick} />
+                        {showCodeViewer && (
+                            <button
+                                onClick={() => {
+                                    setHasGeneratedTests(true);
+                                    setTimeout(() => {
+                                        testViewerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }, 100);
+                                }}
+                                className="w-full bg-green-600 hover:bg-green-500 px-6 py-2 rounded-full font-bold transition-all shadow-lg text-sm uppercase tracking-widest focus-visible:outline-none"
+                                title={!hasGeneratedTests ? t('generateUnitTestsFloat') : ""}
+                            >
+                                {hasGeneratedTests ? t('goToUnitTests') : t('generateUnitTests')}
+                            </button>
+                        )}
+
                     </div>
 
                     {showCodeViewer ? (
                         <div className="flex-1 min-w-0">
-                            <CodeViewer code={sourceCode} refactoredCode={result.refactoredCode} highlightedLine={highlightedLine} handleDirectInput={handleDirectInput} />
+                            <CodeViewer code={sourceCode} refactoredCode={result.refactoredCode} highlightedLine={highlightedLine} handleDirectInput={handleDirectInput} methods={result.methods} />
                         </div>
                     ) : (
                         <div className="flex-1 min-w-0 flex gap-6">
@@ -200,6 +223,11 @@ function App() {
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+            {result && hasGeneratedTests && showCodeViewer && (
+                <div ref={testViewerRef} className="w-full mt-6">
+                    <TestViewer refactoredCode={result.refactoredCode} generatedTests={generatedTests} setGeneratedTests={setGeneratedTests} />
                 </div>
             )}
             <Toaster />

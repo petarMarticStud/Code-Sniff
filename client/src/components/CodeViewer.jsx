@@ -46,10 +46,12 @@ export function CodeViewer({
     refactoredCode,
     language = 'java',
     highlightedLine = null,
-    handleDirectInput
+    handleDirectInput,
+    methods = []
 }) {
     const { t } = useTranslation();
     const [isCopying, setIsCopying] = useState(false);
+    const [showDiffHighlight, setShowDiffHighlight] = useState(true);
     const diffViewerRef = useRef(null);
     
     const oldValue = useMemo(() => normalizeCode(code), [code]);
@@ -111,6 +113,81 @@ export function CodeViewer({
         }
     }, [highlightedLine]);
 
+    const getComplexityColor = (complexity) => {
+        if (complexity < 5) return '#22c55e'; // green
+        if (complexity < 10) return '#eab308'; // yellow
+        return '#ef4444'; // red
+    };
+
+    useEffect(() => {
+        if (!diffViewerRef.current || !methods || methods.length === 0) return;
+
+        const timer = setTimeout(() => {
+            const rows = diffViewerRef.current.querySelectorAll('tr');
+            let lastMethodColor = '#d1d5db'; // grey for before first method
+            
+            rows.forEach(row => {
+                // Get the first gutter (original code line number only)
+                const gutters = row.querySelectorAll('td[class*="gutter"]');
+                if (gutters.length === 0) return;
+                
+                const firstGutter = gutters[0];
+                const lineNumText = firstGutter.textContent.trim();
+                const lineNum = parseInt(lineNumText, 10);
+                
+                // If this is a numbered line, check if we're in a new method
+                if (!isNaN(lineNum)) {
+                    let matchedMethod = null;
+                    
+                    // Find the method with the highest line number that's <= current lineNum
+                    for (const method of methods) {
+                        if (lineNum >= method.line) {
+                            if (!matchedMethod || method.line > matchedMethod.line) {
+                                matchedMethod = method;
+                            }
+                        }
+                    }
+                    
+                    if (matchedMethod) {
+                        lastMethodColor = getComplexityColor(matchedMethod.complexity);
+                    }
+                }
+                
+                firstGutter.style.borderLeft = `6px solid ${lastMethodColor}`;
+            });
+        }, 50);
+
+        return () => clearTimeout(timer);
+    }, [methods, showDiffHighlight, oldValue, newValue]);
+
+    const toggleDiffHighlight = () => {
+        setShowDiffHighlight(!showDiffHighlight);
+    };
+
+    const diffColorPalette = showDiffHighlight
+        ? {
+            addedBackground: 'rgba(34, 197, 94, 0.14)',
+            removedBackground: 'rgba(239, 68, 68, 0.14)',
+            wordAddedBackground: 'rgba(34, 197, 94, 0.28)',
+            wordRemovedBackground: 'rgba(239, 68, 68, 0.28)',
+            addedGutterBackground: 'rgba(34, 197, 94, 0.18)',
+            removedGutterBackground: 'rgba(239, 68, 68, 0.18)',
+            gutterColor: '#9ca3af',
+            addedGutterColor: '#bbf7d0',
+            removedGutterColor: '#fecaca',
+        }
+        : {
+            addedBackground: 'rgba(17, 24, 39, 0.6)',
+            removedBackground: 'rgba(17, 24, 39, 0.6)',
+            wordAddedBackground: 'rgba(17, 24, 39, 0.6)',
+            wordRemovedBackground: 'rgba(17, 24, 39, 0.6)',
+            addedGutterBackground: 'rgba(31, 41, 55, 0.65)',
+            removedGutterBackground: 'rgba(31, 41, 55, 0.65)',
+            gutterColor: '#9ca3af',
+            addedGutterColor: '#9ca3af',
+            removedGutterColor: '#9ca3af',
+        };
+
     const handleCopyRefactoredCode = async () => {
         setIsCopying(true);
         try {
@@ -148,11 +225,36 @@ export function CodeViewer({
                     <h3 className="text-sm font-bold uppercase tracking-widest text-gray-300">
                         {t('codeComparison')}
                     </h3>
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-4 text-xs font-medium">
-                            <span className="text-red-300">{t('removed')}</span>
-                            <span className="text-green-300">{t('added')}</span>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        {showDiffHighlight && (
+                            <div className="flex items-center gap-4 text-xs font-medium">
+                                <span className="text-red-300">{t('removed')}</span>
+                                <span className="text-green-300">{t('added')}</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={toggleDiffHighlight}
+                            className={`p-2 transition-colors rounded border flex items-center justify-center ${
+                                showDiffHighlight
+                                    ? 'text-white bg-gray-700 hover:bg-gray-600 active:bg-gray-500 border-gray-600 hover:border-gray-500'
+                                    : 'text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border-blue-500 hover:border-blue-400'
+                            }`}
+                            title={showDiffHighlight ? t('hideDiffrences') : t('showDiffrences')}
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="white"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
                         <button
                             onClick={handleCopyRefactoredCode}
                             disabled={isCopying}
@@ -188,8 +290,8 @@ export function CodeViewer({
                         oldValue={oldValue}
                         newValue={newValue}
                         splitView={true}
-                        compareMethod="diffWordsWithSpace"
-                        disableWordDiff={false}
+                        compareMethod={showDiffHighlight ? "diffWordsWithSpace" : null}
+                        disableWordDiff={!showDiffHighlight}
                         showDiffOnly={false}
                         hideLineNumbers={false}
                         renderContent={renderContent}
@@ -201,14 +303,14 @@ export function CodeViewer({
                                 dark: {
                                     diffViewerBackground: 'rgba(17, 24, 39, 0.6)',
                                     diffViewerColor: '#f3f4f6',
-                                    addedBackground: 'rgba(34, 197, 94, 0.14)',
+                                    addedBackground: diffColorPalette.addedBackground,
                                     addedColor: '#f3f4f6',
-                                    removedBackground: 'rgba(239, 68, 68, 0.14)',
+                                    removedBackground: diffColorPalette.removedBackground,
                                     removedColor: '#f3f4f6',
-                                    wordAddedBackground: 'rgba(34, 197, 94, 0.28)',
-                                    wordRemovedBackground: 'rgba(239, 68, 68, 0.28)',
-                                    addedGutterBackground: 'rgba(34, 197, 94, 0.18)',
-                                    removedGutterBackground: 'rgba(239, 68, 68, 0.18)',
+                                    wordAddedBackground: diffColorPalette.wordAddedBackground,
+                                    wordRemovedBackground: diffColorPalette.wordRemovedBackground,
+                                    addedGutterBackground: diffColorPalette.addedGutterBackground,
+                                    removedGutterBackground: diffColorPalette.removedGutterBackground,
                                     gutterBackground: 'rgba(31, 41, 55, 0.65)',
                                     gutterBackgroundDark: 'rgba(31, 41, 55, 0.65)',
                                     highlightBackground: 'rgba(59, 130, 246, 0.15)',
@@ -216,9 +318,9 @@ export function CodeViewer({
                                     codeFoldGutterBackground: 'rgba(31, 41, 55, 0.65)',
                                     codeFoldBackground: 'rgba(17, 24, 39, 0.45)',
                                     emptyLineBackground: 'rgba(17, 24, 39, 0.35)',
-                                    gutterColor: '#9ca3af',
-                                    addedGutterColor: '#bbf7d0',
-                                    removedGutterColor: '#fecaca',
+                                    gutterColor: diffColorPalette.gutterColor,
+                                    addedGutterColor: diffColorPalette.addedGutterColor,
+                                    removedGutterColor: diffColorPalette.removedGutterColor,
                                     codeFoldContentColor: '#93c5fd',
                                     diffViewerTitleBackground: 'rgba(31, 41, 55, 0.5)',
                                     diffViewerTitleColor: '#d1d5db',
