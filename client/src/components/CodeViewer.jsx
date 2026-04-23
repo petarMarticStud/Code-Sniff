@@ -218,6 +218,29 @@ export function CodeViewer({
         }
     };
 
+    const handleDownloadRefactoredCode = () => {
+        if (!refactoredCode) return;
+
+        const element = document.createElement('a');
+        const file = new Blob([refactoredCode], { type: 'text/plain' });
+        element.href = URL.createObjectURL(file);
+        element.download = 'RefactoredCode.java';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        
+        toast.success(t('downloadCodeToast'), {
+            duration: 3000,
+            position: 'top-right',
+            style: {
+                background: '#1f2937',
+                color: '#f3f4f6',
+                border: '1px solid #28a745',
+                borderRadius: '8px',
+            },
+        });
+    };
+
     return (
         <div className="w-full h-full min-w-0 overflow-hidden">
             <div className="h-full rounded-3xl overflow-hidden border border-gray-800 bg-gray-900/60 shadow-xl backdrop-blur">
@@ -258,7 +281,7 @@ export function CodeViewer({
                         <button
                             onClick={handleCopyRefactoredCode}
                             disabled={isCopying}
-                            className="ml-4 p-2 text-white bg-gray-700 hover:bg-gray-600 active:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded border border-gray-600 hover:border-gray-500 flex items-center justify-center"
+                            className="p-2 text-white bg-gray-700 hover:bg-gray-600 active:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded border border-gray-600 hover:border-gray-500 flex items-center justify-center"
                             title={t('copyFloat')}
                         >
                             <svg
@@ -276,8 +299,26 @@ export function CodeViewer({
                             </svg>
                         </button>
                         <button
+                            onClick={handleDownloadRefactoredCode}
+                            className="p-2 text-white bg-green-600 hover:bg-green-500 active:bg-green-700 transition-colors rounded border border-green-500 hover:border-green-400 flex items-center justify-center"
+                            title={t('downloadCodeFloat')}
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="white"
+                                strokeWidth="2"
+                            >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <button
                             onClick={() => handleDirectInput && handleDirectInput(refactoredCode)}
-                            className="ml-2 px-4 py-2 text-white bg-purple-600 hover:bg-purple-500 active:bg-purple-700 transition-colors rounded border border-purple-500 hover:border-purple-400 text-sm font-medium"
+                            className="p-2 text-white bg-purple-600 hover:bg-purple-500 active:bg-purple-700 transition-colors rounded border border-purple-500 hover:border-purple-400 text-sm font-medium"
                             title={t('reAnalyzeCodeFloat')}
                         >
                             {t('reAnalyzeCode')}

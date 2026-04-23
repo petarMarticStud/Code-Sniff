@@ -60,7 +60,9 @@
     "copyTestsFloat": "Copy tests to clipboard",
     "downloadTestsFloat": "Download as Java file",
     "generatedUnitTests": "Generated Unit Tests",
-    "generatingTests": "Generating tests..."
+    "generatingTests": "Generating tests...",
+    "downloadCodeToast": "Refactored code downloaded!",
+    "downloadCodeFloat": "Download refactored code as Java file"
   },
   "de": {
     "ready": "Bereit",
@@ -123,6 +125,8 @@
     "copyTestsFloat": "Tests in die Zwischenablage kopieren",
     "downloadTestsFloat": "Als Java-Datei herunterladen",
     "generatedUnitTests": "Generierte Unit-Tests",
-    "generatingTests": "Generiere Tests..."
+    "generatingTests": "Generiere Tests...",
+    "downloadCodeToast": "Refaktorierter Code heruntergeladen!",
+    "downloadCodeFloat": "Refaktorierten Code als Java-Datei herunterladen"
   }
 }
