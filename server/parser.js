@@ -62,7 +62,8 @@ function getMethodMetrics(node) {
             name: methodName,
             complexity: calculateComplexity(node) + 1,
             line: node.startPosition.row + 1, // Tree-Sitter zählt ab 0, wir brauchen 1-basiert
-            smells: detectSmells(node)
+            smells: detectSmells(node),
+            body: node.text
         });
     }
 
@@ -90,9 +91,24 @@ function detectSmells(node) {
     return smells;
 }
 
+//wait for 1 second to simulate processing time
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports = {
-    analyzeCode: (sourceCode) => {
+    analyzeCode: async (sourceCode, send) => {
+
+        if (send) {
+            send("status", "parsing");
+            await wait(1000);
+        }
         const tree = parser.parse(sourceCode);
+
+        if (send) {
+            send("status", "calculatingMetrics");
+            await wait(1000);
+        }
         const methodMetrics = getMethodMetrics(tree.rootNode);
 
         //M5: Sortiert nach complexity
