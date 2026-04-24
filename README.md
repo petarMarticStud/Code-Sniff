@@ -65,7 +65,7 @@ Erstelle im Ordner `server/` eine Datei namens `.env` und füge deine Zugangsdat
 
 ```env
 PORT=3000
-OPENAI_API_KEY=dein_groq_api_key_hier
+GROQ_API_KEY=dein_groq_api_key_hier
 ```
 ## 4. Startet beide Server (Vite & Express)
 ```bash
