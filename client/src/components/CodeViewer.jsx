@@ -9,37 +9,33 @@ function normalizeCode(value) {
     return (value || '').replace(/\r\n/g, '\n');
 }
 
-function renderHighlightedLine(language) {
-    return function renderContent(content) {
-        return (
-            <SyntaxHighlighter
-                language={language}
-                style={oneDark}
-                PreTag="div"
-                customStyle={{
-                    margin: 0,
-                    padding: 0,
+function renderLine(content) {
+    return (
+        <SyntaxHighlighter
+            language="java"
+            style={oneDark}
+            PreTag="div"
+            customStyle={{
+                margin: 0,
+                padding: 0,
+                background: 'transparent',
+                fontSize: '0.875rem',
+                lineHeight: '1.6',
+                overflow: 'visible',
+            }}
+            codeTagProps={{
+                style: {
                     background: 'transparent',
-                    fontSize: '0.875rem',
-                    lineHeight: '1.6',
-                    overflow: 'visible',
-                }}
-                codeTagProps={{
-                    style: {
-                        background: 'transparent',
-                        fontFamily:
-                            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                    },
-                }}
-                wrapLongLines={true}
-            >
-                {content || ' '}
-            </SyntaxHighlighter>
-        );
-    };
+                    fontFamily:
+                        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                },
+            }}
+            wrapLongLines={true}
+        >
+            {content || ' '}
+        </SyntaxHighlighter>
+    );
 }
-
-
 
 export function CodeViewer({
     code,
@@ -58,11 +54,6 @@ export function CodeViewer({
     const newValue = useMemo(
         () => normalizeCode(refactoredCode),
         [refactoredCode]
-    );
-
-    const renderContent = useMemo(
-        () => renderHighlightedLine(language),
-        [language]
     );
 
     // Handle highlighting and scrolling when a line is highlighted
@@ -335,7 +326,7 @@ export function CodeViewer({
                         disableWordDiff={!showDiffHighlight}
                         showDiffOnly={false}
                         hideLineNumbers={false}
-                        renderContent={renderContent}
+                        renderContent={renderLine}
                         leftTitle={t('originalCode')}
                         rightTitle={t('refactoredCode')}
                         useDarkTheme={true}
