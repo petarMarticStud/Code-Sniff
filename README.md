@@ -32,7 +32,7 @@ Das Projekt nutzt eine **Unified Monorepo-Architektur**, bei der Frontend und Ba
 | Frontend | React (Vite), Tailwind CSS v4 |
 | Backend | Node.js, Express |
 | Analyse | Tree-sitter (Java) |
-| KI | GroQ API (Llama Models) |
+| KI | GroQ API (OpenAPI Models) |
 
 ---
 
