@@ -7,6 +7,7 @@ import { AiAdvisor } from "./components/AiAdvisor.jsx";
 import { CodeViewer } from './components/CodeViewer';
 import { MethodSelector } from './components/MethodSelector';
 import { TestViewer } from './components/TestViewer';
+import { ProjectTree } from './components/ProjectTree';
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useTranslation } from 'react-i18next';
 
@@ -26,6 +27,11 @@ function App() {
     const [hasGeneratedTests, setHasGeneratedTests] = useState(false);
     const [generatedTests, setGeneratedTests] = useState(null);
     const testViewerRef = useRef(null);
+
+    // SHRD M1: hochgeladenes Projekt (.zip)
+    const zipInputRef = useRef(null);
+    const [project, setProject] = useState(null);
+    const [isUploadingProject, setIsUploadingProject] = useState(false);
 
 
     const handleMethodClick = (lineNumber) => {
@@ -99,6 +105,27 @@ function App() {
         reader.readAsText(selectedFile);
     };
 
+    const handleZipChange = async (e) => {
+        const selectedFile = e.target.files[0];
+        e.target.value = null;
+        if (!selectedFile) return;
+
+        const formData = new FormData();
+        formData.append('project', selectedFile);
+        setIsUploadingProject(true);
+        try {
+            const res = await fetch('http://localhost:3000/api/project/upload', { method: 'POST', body: formData });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || t('projectUploadFailed'));
+            setResult(null);
+            setProject(json.data);
+        } catch (err) {
+            setError(err.message || t('projectUploadFailed'));
+        } finally {
+            setIsUploadingProject(false);
+        }
+    };
+
     const handleDirectInput = (sourceCode) => {
         setResult(null);
         setError(null);
@@ -154,6 +181,7 @@ function App() {
             </div>
 
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".java" />
+            <input type="file" ref={zipInputRef} onChange={handleZipChange} className="hidden" accept=".zip" />
 
             {isSelectingMethods && (
                 <MethodSelector
@@ -167,7 +195,7 @@ function App() {
             )}
 
             {!isSelectingMethods && (
-                <div className="flex justify-center mb-12">
+                <div className="flex justify-center gap-4 mb-12">
                     <button
                         onClick={() => fileInputRef.current.click()}
                         disabled={status !== 'Ready'}
@@ -175,7 +203,23 @@ function App() {
                     >
                         {status === 'Ready' ? t('fileSelect') : t(status)}
                     </button>
+                    <button
+                        onClick={() => zipInputRef.current.click()}
+                        disabled={status !== 'Ready' || isUploadingProject}
+                        className="bg-cyan-700 hover:bg-cyan-600 disabled:bg-gray-600 disabled:cursor-not-allowed px-8 py-3 rounded-full font-bold transition-all shadow-lg text-sm uppercase tracking-widest focus-visible:outline-none"
+                        title={t('projectUploadFloat')}
+                    >
+                        {isUploadingProject ? t('uploadingProject') : t('projectUpload')}
+                    </button>
                 </div>
+            )}
+
+            {project && !isSelectingMethods && (
+                <ProjectTree
+                    project={project}
+                    onSelectFile={(file) => handleDirectInput(file.content)}
+                    onClose={() => setProject(null)}
+                />
             )}
 
             {result && (

@@ -4,6 +4,35 @@ const parser = new Parser();
 parser.setLanguage(Java);
 
 /**
+ * Parst Java-Quellcode. bufferSize ist nötig, da node-tree-sitter sonst bei
+ * Eingaben > 32 KB mit "Invalid argument" abbricht.
+ */
+function parseJava(sourceCode) {
+    return parser.parse(sourceCode, null, { bufferSize: sourceCode.length * 2 + 1 });
+}
+
+/**
+ * Sammelt Syntaxfehler (ERROR- und MISSING-Knoten) mit 1-basierter Zeile/Spalte.
+ * Steigt nur in Teilbäume ab, die tatsächlich Fehler enthalten.
+ */
+function collectSyntaxErrors(node, errors = [], max = 20) {
+    if (errors.length >= max) return errors;
+    if (node.type === 'ERROR' || node.isMissing) {
+        errors.push({
+            line: node.startPosition.row + 1,
+            column: node.startPosition.column + 1,
+            message: node.isMissing ? `Missing '${node.type}'` : 'Unexpected syntax'
+        });
+        return errors;
+    }
+    for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child.hasError || child.isMissing) collectSyntaxErrors(child, errors, max);
+    }
+    return errors;
+}
+
+/**
  * M2: Hilfsfunktion zur Vereinfachung des AST für die UI.
  * Entfernt unnötige Zeichen und bereitet die Struktur für Jamils Tree-View vor.
  */
@@ -96,14 +125,27 @@ function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * SHRD M1: Syntaxprüfung einer Projektdatei.
+ */
+function checkSyntax(sourceCode) {
+    const tree = parseJava(sourceCode);
+    return {
+        hasSyntaxError: tree.rootNode.hasError,
+        syntaxErrors: tree.rootNode.hasError ? collectSyntaxErrors(tree.rootNode) : []
+    };
+}
+
 module.exports = {
+    parseJava,
+    checkSyntax,
     analyzeCode: async (sourceCode, send) => {
 
         if (send) {
             send("status", "parsing");
             await wait(1000);
         }
-        const tree = parser.parse(sourceCode);
+        const tree = parseJava(sourceCode);
 
         if (send) {
             send("status", "calculatingMetrics");

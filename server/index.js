@@ -4,6 +4,8 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const { analyzeCode } = require('./parser');
+const multer = require('multer');
+const { extractProject, ProjectUploadError, MAX_ZIP_BYTES } = require('./projectUpload');
 const Groq = require('groq-sdk');
 
 const app = express();
@@ -15,6 +17,10 @@ if (!process.env.GROQ_API_KEY) {
 } else {
     console.log("API-Key geladen");
 }
+
+// llama-3.3-70b-versatile ist bei Groq nicht mehr verfügbar
+// (Reasoning-Modell: Denk-Tokens zählen gegen max_tokens, daher großzügige Limits)
+const AI_MODEL = "openai/gpt-oss-120b";
 
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY
@@ -37,18 +43,19 @@ async function getRefactoringSuggestions(sourceCode, metrics) {
                     content: `Analysiere diesen Java-Code:\n\n${sourceCode}`
                 }
             ],
-            model: "llama-3.3-70b-versatile",
+            model: AI_MODEL,
             temperature: 0.2,
-            max_tokens: 1200,
+            max_tokens: 2000,
         });
 
         const response = chatCompletion.choices[0]?.message?.content || "";
         
         // Parse suggestions from response
-        const suggestionsMatch_DE = response.match(/#\s*SUGGESTIONS_DE:\s*([\s\S]*?)(?=# SUGGESTIONS_EN:|$)/);
-        const suggestionsMatch_EN = response.match(/#\s*SUGGESTIONS_EN:\s*([\s\S]*?)(?=$)/);
+        // Toleriert Markdown um die Überschriften, z.B. "# SUGGESTIONS_DE:" oder "**SUGGESTIONS_DE:**"
+        const suggestionsMatch_DE = response.match(/SUGGESTIONS_DE:?\**\s*([\s\S]*?)(?=[#*\s]*SUGGESTIONS_EN|$)/);
+        const suggestionsMatch_EN = response.match(/SUGGESTIONS_EN:?\**\s*([\s\S]*)$/);
         
-        const suggestionsDE = suggestionsMatch_DE ? suggestionsMatch_DE[1].trim() : "Keine Vorschläge erhalten.";
+        const suggestionsDE = suggestionsMatch_DE ? suggestionsMatch_DE[1].trim().replace(/\n-{3,}$/, '').trim() : "Keine Vorschläge erhalten.";
         const suggestionsEN = suggestionsMatch_EN ? suggestionsMatch_EN[1].trim() : "No suggestions received.";
         
         return {
@@ -81,9 +88,9 @@ async function getRefactoredCode(sourceCode, suggestions, metrics) {
                     content: `Refaktorisiere diesen Java-Code basierend auf folgenden Vorschlägen:\n\n${suggestionsText}\n\nCode:\n\n${sourceCode}`
                 }
             ],
-            model: "llama-3.3-70b-versatile",
+            model: AI_MODEL,
             temperature: 0.2,
-            max_tokens: 3000,
+            max_tokens: 2000,
         });
 
         const response = chatCompletion.choices[0]?.message?.content || "";
@@ -176,9 +183,9 @@ app.post('/api/getUnitTests', async (req, res) => {
                     content: `Erstelle Unit-Tests für diesen Java-Code:\n\n${sourceCode}`
                 }
             ],
-            model: "llama-3.3-70b-versatile",
+            model: AI_MODEL,
             temperature: 0.2,
-            max_tokens: 3000,
+            max_tokens: 2000,
         });
 
         const response = chatCompletion.choices[0]?.message?.content || "";
@@ -197,6 +204,31 @@ app.post('/api/getUnitTests', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// SHRD M1: Upload eines kompletten Java-Projekts als .zip
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_ZIP_BYTES } });
+
+app.post('/api/project/upload', (req, res) => {
+    upload.single('project')(req, res, (uploadErr) => {
+        if (uploadErr) {
+            const tooLarge = uploadErr.code === 'LIMIT_FILE_SIZE';
+            return res.status(tooLarge ? 413 : 400).json({ error: tooLarge ? 'Archive exceeds 20 MB.' : uploadErr.message });
+        }
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+        if (!req.file.originalname.toLowerCase().endsWith('.zip')) {
+            return res.status(400).json({ error: 'Only .zip archives are accepted.' });
+        }
+
+        try {
+            const project = extractProject(req.file.buffer, req.file.originalname);
+            res.json({ status: 'success', data: project });
+        } catch (err) {
+            if (err instanceof ProjectUploadError) return res.status(err.status).json({ error: err.message });
+            console.error('Project upload failed:', err);
+            res.status(500).json({ error: 'Project could not be processed.' });
+        }
+    });
 });
 
 const PORT = 3000;

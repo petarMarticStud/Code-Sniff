@@ -41,7 +41,7 @@
     "sortLowToHigh": "Sort: Low to High",
     "sortHighToLow": "Sort: High to Low",
     "methodName": "Method Name",
-    "line": "Line",
+    "line": "line",
     "complexity": "Complexity",
     "L": "L",
     "analyzing": "Analyzing...",
@@ -62,7 +62,17 @@
     "generatedUnitTests": "Generated Unit Tests",
     "generatingTests": "Generating tests...",
     "downloadCodeToast": "Refactored code downloaded!",
-    "downloadCodeFloat": "Download refactored code as Java file"
+    "downloadCodeFloat": "Download refactored code as Java file",
+    "projectUpload": "Upload project (.zip)",
+    "projectUploadFloat": "Upload a Java project as .zip (max. 20 MB, max. 200 .java files)",
+    "uploadingProject": "Uploading...",
+    "projectUploadFailed": "Project upload failed",
+    "javaFiles": ".java files",
+    "withSyntaxErrors": "with syntax errors",
+    "syntaxError": "Syntax error",
+    "syntaxErrorsIn": "Syntax errors in",
+    "selectFileHint": "Click a file to analyze it.",
+    "closeProject": "Close project"
   },
   "de": {
     "ready": "Bereit",
@@ -74,7 +84,7 @@
     "analysisView": "Analyse Ansicht",
     "codeView": "Code Ansicht",
     "fileSelect": "Datei wählen & analysieren",
-    "globalHealthScore": "Globaler Gesundheitswert", 
+    "globalHealthScore": "Globaler Gesundheitswert",
     "basis": "Basis: Wartbarkeitsindex",
     "aiAdvisor": "KI Refactoring Berater",
     "abstractSyntaxTree": "Abstrakter Syntaxbaum",
@@ -127,6 +137,16 @@
     "generatedUnitTests": "Generierte Unit-Tests",
     "generatingTests": "Generiere Tests...",
     "downloadCodeToast": "Refaktorierter Code heruntergeladen!",
-    "downloadCodeFloat": "Refaktorierten Code als Java-Datei herunterladen"
+    "downloadCodeFloat": "Refaktorierten Code als Java-Datei herunterladen",
+    "projectUpload": "Projekt hochladen (.zip)",
+    "projectUploadFloat": "Java-Projekt als .zip hochladen (max. 20 MB, max. 200 .java-Dateien)",
+    "uploadingProject": "Wird hochgeladen...",
+    "projectUploadFailed": "Projekt-Upload fehlgeschlagen",
+    "javaFiles": ".java-Dateien",
+    "withSyntaxErrors": "mit Syntaxfehlern",
+    "syntaxError": "Syntaxfehler",
+    "syntaxErrorsIn": "Syntaxfehler in",
+    "selectFileHint": "Datei anklicken, um sie zu analysieren.",
+    "closeProject": "Projekt schließen"
   }
 }
