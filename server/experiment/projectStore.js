@@ -140,7 +140,13 @@ async function writeWorkingFile(workingDir, relPath, content) {
     return target;
 }
 
+const getProjectDir = (projectId) => projectDir(projectId);
+const getOriginalDir = (projectId) => path.join(projectDir(projectId), 'original');
+
 module.exports = {
+    getProjectDir,
+    getOriginalDir,
+    listFilesRecursive,
     saveOriginalProject,
     loadManifest,
     verifyOriginal,

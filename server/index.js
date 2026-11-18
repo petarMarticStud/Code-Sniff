@@ -7,6 +7,7 @@ const { analyzeCode } = require('./parser');
 const multer = require('multer');
 const { extractProject, ProjectUploadError, MAX_ZIP_BYTES } = require('./projectUpload');
 const projectStore = require('./experiment/projectStore');
+const junitRunner = require('./experiment/junitRunner');
 const Groq = require('groq-sdk');
 
 const app = express();
@@ -232,6 +233,17 @@ app.post('/api/project/upload', (req, res) => {
             res.status(500).json({ error: 'Project could not be processed.' });
         }
     });
+});
+
+// PM M3: Baseline – Originalprojekt mit seinen Referenztests in Docker ausführen
+app.post('/api/projects/:projectId/baseline', async (req, res) => {
+    try {
+        const baseline = await junitRunner.runBaseline(req.params.projectId);
+        res.json({ status: 'success', data: baseline });
+    } catch (err) {
+        const notFound = err.code === 'ENOENT' || /Invalid project id/.test(err.message);
+        res.status(notFound ? 404 : 400).json({ error: err.message });
+    }
 });
 
 const PORT = 3000;
