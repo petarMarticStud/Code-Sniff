@@ -6,6 +6,7 @@ const cors = require('cors');
 const { analyzeCode } = require('./parser');
 const multer = require('multer');
 const { extractProject, ProjectUploadError, MAX_ZIP_BYTES } = require('./projectUpload');
+const projectStore = require('./experiment/projectStore');
 const Groq = require('groq-sdk');
 
 const app = express();
@@ -210,7 +211,7 @@ app.post('/api/getUnitTests', async (req, res) => {
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_ZIP_BYTES } });
 
 app.post('/api/project/upload', (req, res) => {
-    upload.single('project')(req, res, (uploadErr) => {
+    upload.single('project')(req, res, async (uploadErr) => {
         if (uploadErr) {
             const tooLarge = uploadErr.code === 'LIMIT_FILE_SIZE';
             return res.status(tooLarge ? 413 : 400).json({ error: tooLarge ? 'Archive exceeds 20 MB.' : uploadErr.message });
@@ -222,7 +223,9 @@ app.post('/api/project/upload', (req, res) => {
 
         try {
             const project = extractProject(req.file.buffer, req.file.originalname);
-            res.json({ status: 'success', data: project });
+            // PM NF1: Original schreibgeschützt speichern; spätere Änderungen nur in Arbeitskopien
+            const manifest = await projectStore.saveOriginalProject(project);
+            res.json({ status: 'success', data: { ...project, projectId: manifest.projectId } });
         } catch (err) {
             if (err instanceof ProjectUploadError) return res.status(err.status).json({ error: err.message });
             console.error('Project upload failed:', err);

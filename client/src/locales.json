@@ -72,7 +72,11 @@
     "syntaxError": "Syntax error",
     "syntaxErrorsIn": "Syntax errors in",
     "selectFileHint": "Click a file to analyze it.",
-    "closeProject": "Close project"
+    "closeProject": "Close project",
+    "testFile": "Test",
+    "productionFiles": "production",
+    "testFiles": "test",
+    "noPomFound": "no pom.xml (Maven tests not possible)"
   },
   "de": {
     "ready": "Bereit",
@@ -147,6 +151,10 @@
     "syntaxError": "Syntaxfehler",
     "syntaxErrorsIn": "Syntaxfehler in",
     "selectFileHint": "Datei anklicken, um sie zu analysieren.",
-    "closeProject": "Projekt schließen"
+    "closeProject": "Projekt schließen",
+    "testFile": "Test",
+    "productionFiles": "Produktion",
+    "testFiles": "Test",
+    "noPomFound": "keine pom.xml (Maven-Tests nicht möglich)"
   }
 }

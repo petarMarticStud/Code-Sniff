@@ -44,15 +44,19 @@ function TreeChildren({ node, depth, folders, onSelectFile }) {
 			{node.files.map(file => (
 				<li key={file.path}>
 					<button
-						onClick={() => onSelectFile(file)}
-						className="flex items-center gap-2 w-full text-left py-1 hover:bg-gray-800/50 rounded"
+						onClick={() => file.role !== 'build' && onSelectFile(file)}
+						disabled={file.role === 'build'}
+						className="flex items-center gap-2 w-full text-left py-1 hover:bg-gray-800/50 rounded disabled:cursor-default disabled:hover:bg-transparent"
 						style={{ paddingLeft: depth * 16 + 20 }}
 						title={file.hasSyntaxError
 							? `${t('syntaxErrorsIn')}: ${file.syntaxErrors.map(e => `${t('line')} ${e.line}`).join(', ')}`
 							: file.path}
 					>
-						<span className="text-orange-400">☕</span>
-						<span className={`font-mono text-sm ${file.hasSyntaxError ? 'text-red-400' : 'text-gray-200'}`}>{file.name}</span>
+						<span className="text-orange-400">{file.role === 'build' ? '⚙️' : '☕'}</span>
+						<span className={`font-mono text-sm ${file.hasSyntaxError ? 'text-red-400' : file.role === 'build' ? 'text-gray-500' : 'text-gray-200'}`}>{file.name}</span>
+						{file.role === 'test' && (
+							<span className="text-[10px] font-bold uppercase bg-green-500/20 text-green-400 px-2 rounded-full">{t('testFile')}</span>
+						)}
 						{file.hasSyntaxError && (
 							<span className="text-[10px] font-bold uppercase bg-red-500/20 text-red-400 px-2 rounded-full">
 								⚠ {t('syntaxError')}
@@ -70,6 +74,8 @@ export function ProjectTree({ project, onSelectFile, onClose }) {
 	const tree = useMemo(() => buildTree(project.files), [project]);
 	const rootFolders = Object.values(tree.children).sort((a, b) => a.name.localeCompare(b.name));
 	const errorCount = project.files.filter(f => f.hasSyntaxError).length;
+	const productionCount = project.files.filter(f => f.role === 'production').length;
+	const testCount = project.files.filter(f => f.role === 'test').length;
 
 	return (
 		<div className="w-full max-w-3xl mx-auto mb-12 bg-gray-900/60 border border-gray-800 rounded-3xl p-6 shadow-xl backdrop-blur">
@@ -77,7 +83,8 @@ export function ProjectTree({ project, onSelectFile, onClose }) {
 				<div>
 					<h3 className="text-xl font-bold text-blue-400">{project.projectName}</h3>
 					<p className="text-xs text-gray-400 mt-1">
-						{project.files.length} {t('javaFiles')}
+						{productionCount + testCount} {t('javaFiles')} ({productionCount} {t('productionFiles')}, {testCount} {t('testFiles')})
+						{!project.mavenRoot && <span className="text-yellow-500"> · {t('noPomFound')}</span>}
 						{errorCount > 0 && <span className="text-red-400"> · {errorCount} {t('withSyntaxErrors')}</span>}
 					</p>
 					<p className="text-[10px] text-gray-500 mt-1">{t('selectFileHint')}</p>
